@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="ru"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#5a8a1e">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon-192.png">
+<title>Учим слова</title>
+<style>
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;font-family:system-ui,sans-serif;background:#f4f8ec;color:#1d2b0c}
+main{max-width:480px;margin:0 auto;padding:16px;min-height:100dvh}
+.col{display:flex;flex-direction:column;gap:12px}
+h1{margin:8px 0;text-align:center;color:#3f6b10}
+button,select,input{font:inherit;font-size:20px;border-radius:16px;border:2px solid #5a8a1e;padding:14px;background:#fff;color:inherit;width:100%}
+input{text-align:center}
+button{font-weight:600}
+.m{background:#5a8a1e;color:#fff;border:0}
+.card{background:#fff;border-radius:20px;padding:24px 16px;text-align:center;font-size:30px;font-weight:700;box-shadow:0 2px 8px #0002}
+.card small{display:block;font-size:20px;font-weight:400;color:#1a3d7a;margin-top:6px}
+.top{display:flex;justify-content:space-between;font-size:18px}
+.ok{background:#c8f0b0!important;border-color:#3a8a10!important}
+.bad{background:#ffc9c0!important;border-color:#c0301a!important}
+#fb{min-height:28px;text-align:center;font-size:20px;font-weight:600}
+#say{width:auto;display:inline-block;padding:6px 16px;margin-top:10px}
+.hide{display:none!important}
+</style></head><body><main>
+<div id="home" class="col">
+<h1>Учим слова 🇬🇧</h1>
+<select id="sec"></select>
+<button class="m" data-m="en2ru">🇬🇧 → 🇷🇺 Выбери перевод</button>
+<button class="m" data-m="ru2en">🇷🇺 → 🇬🇧 Выбери слово</button>
+<button class="m" data-m="type_en">⌨️ Напиши по-английски</button>
+<button class="m" data-m="type_ru">🗣 Напиши, как читается</button>
+<button class="m" data-m="mix">🎲 Всё вперемешку</button>
+</div>
+<div id="quiz" class="col hide">
+<div class="top"><span id="pr"></span><span id="sc"></span></div>
+<div class="card"><span id="q"></span><small id="ipa"></small><button id="say" onclick="say(cur[0])">🔊</button></div>
+<div id="opts" class="col"></div>
+<input id="inp" class="hide" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false">
+<button id="chk" class="m hide">Проверить</button>
+<div id="fb"></div>
+<button id="nx" class="m hide">Дальше ▶</button>
+<button onclick="home()">⬅ В меню</button>
+</div>
+</main>
+<script>
+const W=[["cute","kjuːt","кьют","очаровательный","I was a funny baby!"],["naughty","nɔːti","НО-ти","непослушный","I was a funny baby!"],["noisy","nɔɪzi","НОЙ-зи","шумный","I was a funny baby!"],["quiet","kwaɪət","КВАЙ-ет","спокойный","I was a funny baby!"],["yesterday","jestəʳdeɪ","ЙЕС-те-дей","вчера","I was a funny baby!"],["cheese","tʃiːz","чиз","сыр","Module 3 · Unit 5: He loves jelly!"],["chicken","tʃɪkɪn","ЧИ-кин","курица, цыплёнок","Module 3 · Unit 5: He loves jelly!"],["egg","eg","эг","яйцо","Module 3 · Unit 5: He loves jelly!"],["jelly","dʒeli","ДЖЭ-ли","желе","Module 3 · Unit 5: He loves jelly!"],["lemonade","leməneɪd","ле-мо-НЭЙД","лимонад","Module 3 · Unit 5: He loves jelly!"],["cake","keɪk","кэйк","торт, пирожное","Unit 6: In my lunch box!"],["carrot","kærət","КЭ-рот","морковь","Unit 6: In my lunch box!"],["crunch","krʌntʃ","кранч","грызть с хрустом, хрустеть","Unit 6: In my lunch box!"],["drink","drɪŋk","дринк","пить","Unit 6: In my lunch box!"],["dry","draɪ","драй","сухой","Unit 6: In my lunch box!"],["find out","faɪnd aʊt","файнд аут","выяснять","Unit 6: In my lunch box!"],["Here you are.","hɪə juː ɑːʳ","хиэ ю а","Вот, пожалуйста.","Unit 6: In my lunch box!"],["lunch box","lʌntʃ bɒks","ланч бокс","коробка с завтраком","Unit 6: In my lunch box!"],["munch","mʌntʃ","манч","жевать","Unit 6: In my lunch box!"],["need","niːd","нид","нуждаться","Unit 6: In my lunch box!"],["pasta","pæstə","ПЭС-та","макаронные изделия","Unit 6: In my lunch box!"],["potato","pəteɪtəʊ","по-ТЭЙ-тоу","картофель","Unit 6: In my lunch box!"],["rice","raɪs","райс","рис","Unit 6: In my lunch box!"],["sausage","sɒsɪdʒ","СО-сидж","сосиска","Unit 6: In my lunch box!"],["shopping list","ʃɒpɪŋ lɪst","ШО-пинг лист","список покупок","Unit 6: In my lunch box!"],["aeroplane","eərəpleɪn","ЭЭ-ро-плэйн","самолёт","Module 4 · Unit 7: Toys for little Betsy!"],["elephant","elɪfənt","Э-ли-фант","слон","Module 4 · Unit 7: Toys for little Betsy!"],["Let me see.","let mɪ siː","лэт ми си","Дай(те) мне подумать.","Module 4 · Unit 7: Toys for little Betsy!"],["musical box","mjuːzɪkᵊl bɒks","МЬЮ-зи-кл бокс","музыкальная шкатулка","Module 4 · Unit 7: Toys for little Betsy!"],["rocking horse","rɒkɪŋ hɔːʳs","РО-кинг хос","лошадка-качалка","Module 4 · Unit 7: Toys for little Betsy!"],["tea set","tiː set","ти сэт","чайный сервиз","Module 4 · Unit 7: Toys for little Betsy!"],["train","treɪn","трэйн","поезд","Module 4 · Unit 7: Toys for little Betsy!"],["whose","ʷhuːz","хуз","чей","Module 4 · Unit 7: Toys for little Betsy!"],["armchair","ɑːʳmtʃeəʳ","АМ-чэа","кресло","Unit 8: In my room!"],["computer","kəmpjuːtəʳ","ком-ПЬЮ-тэ","компьютер","Unit 8: In my room!"],["desk","desk","дэск","парта, письменный стол","Unit 8: In my room!"],["playroom","pleɪruːm","ПЛЭЙ-рум","игровая комната","Unit 8: In my room!"],["TV","tiː viː","ти ви","телевизор","Unit 8: In my room!"],["eighteen","eɪtiːn","эй-ТИН","восемнадцать","Numbers"],["eleven","ɪlevᵊn","и-ЛЭ-вн","одиннадцать","Numbers"],["fifteen","fɪftiːn","фиф-ТИН","пятнадцать","Numbers"],["fifty","fɪfti","ФИФ-ти","пятьдесят","Numbers"],["forty","fɔːʳti","ФО-ти","сорок","Numbers"],["fourteen","fɔːʳtiːn","фо-ТИН","четырнадцать","Numbers"],["nineteen","naɪntiːn","найн-ТИН","девятнадцать","Numbers"],["seventeen","sevᵊntiːn","сэ-вн-ТИН","семнадцать","Numbers"],["sixteen","sɪkstiːn","сикс-ТИН","шестнадцать","Numbers"],["thirteen","θɜːʳtiːn","сё-ТИН","тринадцать","Numbers"],["thirty","θɜːʳti","СЁ-ти","тридцать","Numbers"],["twelve","twelv","твэлв","двенадцать","Numbers"],["twenty","twenti","ТВЭН-ти","двадцать","Numbers"],["add","æd","эд","добавлять","Fun at school"],["because","bɪkɒz","би-КОЗ","потому что","Fun at school"],["belong","bɪlɒŋ","би-ЛОНГ","принадлежать","Fun at school"],["child","tʃaɪld","чайлд","ребёнок","Fun at school"],["circle","sɜːʳkᵊl","СЁ-кл","круг","Fun at school"],["crocodile","krɒkədaɪl","КРО-ко-дайл","крокодил","Fun at school"],["design","dɪzaɪn","ди-ЗАЙН","придумывать, конструировать","Fun at school"],["domesticated","dəmestɪkeɪtɪd","до-МЭС-ти-кэй-тид","домашний","Fun at school"],["fairy tale","feəri teɪl","ФЭ-ри тэйл","сказка","Fun at school"],["family crest","fæmɪli krest","ФЭ-ми-ли крэст","фамильный герб","Fun at school"],["figure out","fɪgər aʊt","ФИ-гэ аут","вычислять","Fun at school"],["hear","hɪəʳ","хиэ","слышать","Fun at school"],["in the street","ɪn ðə striːt","ин зэ стрит","на улице","Fun at school"],["knew","njuː","нью","знал","Fun at school"],["know","nəʊ","ноу","знать","Fun at school"],["map","mæp","мэп","карта","Fun at school"],["midnight","mɪdnaɪt","МИД-найт","полночь","Fun at school"],["noon","nuːn","нун","полдень","Fun at school"],["painting","peɪntɪŋ","ПЭЙН-тинг","картина","Fun at school"],["scene","siːn","син","эпизод","Fun at school"],["set a clock","set ə klɒk","сэт э клок","устанавливать часы","Fun at school"],["snake","sneɪk","снэйк","змея","Fun at school"],["square","skweəʳ","сквэа","квадрат","Fun at school"],["surname","sɜːʳneɪm","СЁ-нэйм","фамилия","Fun at school"],["take away","teɪk əweɪ","тэйк э-ВЭЙ","вычитать","Fun at school"],["title","taɪtᵊl","ТАЙ-тл","название","Fun at school"],["triangle","traɪæŋgᵊl","ТРАЙ-эн-гл","треугольник","Fun at school"],["turkey","tɜːʳki","ТЁ-ки","индюк, индюшка","Fun at school"],["whale","ʰweɪl","вэйл","кит","Fun at school"],["wild","waɪld","вайлд","дикий","Fun at school"]];
+const $=s=>document.querySelector(s),$$=s=>document.querySelectorAll(s);
+let wr={};try{wr=JSON.parse(localStorage.getItem('wr')||'{}')}catch(e){}
+const save=()=>{try{localStorage.setItem('wr',JSON.stringify(wr))}catch(e){}};
+$('#sec').innerHTML='<option value="">Все слова ('+W.length+')</option>'+[...new Set(W.map(w=>w[4]))].map(s=>'<option>'+s+'</option>').join('');
+let mode,qm,pool,queue,n,score,total,cur,retried,locked;
+const shuf=a=>a.map(x=>[Math.random(),x]).sort((p,q)=>p[0]-q[0]).map(x=>x[1]);
+const nE=s=>s.toLowerCase().replace(/[^a-z]/g,'');
+const nR=s=>s.toLowerCase().replace(/[эё]/g,'е').replace(/[^а-я]/g,'');
+function lev(a,b){let d=[...Array(b.length+1).keys()];for(let i=1;i<=a.length;i++){let p=d[0];d[0]=i;for(let j=1;j<=b.length;j++){const t=d[j];d[j]=Math.min(d[j]+1,d[j-1]+1,p+(a[i-1]==b[j-1]?0:1));p=t}}return d[b.length]}
+function say(t){try{speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(t);u.lang='en-GB';u.rate=.85;speechSynthesis.speak(u)}catch(e){}}
+function pick(k){const a=[...pool],r=[];while(r.length<k&&a.length){const ws=a.map(w=>1+2*(wr[w[0]]||0));let t=Math.random()*ws.reduce((x,y)=>x+y),i=0;while(i<a.length-1&&(t-=ws[i])>0)i++;r.push(a.splice(i,1)[0])}return r}
+function start(m){mode=m;const s=$('#sec').value;pool=W.filter(w=>!s||w[4]==s);queue=pick(Math.min(10,pool.length));total=queue.length;n=0;score=0;retried=new Set();$('#home').classList.add('hide');$('#quiz').classList.remove('hide');next()}
+function home(){$('#quiz').classList.add('hide');$('#home').classList.remove('hide')}
+const corr=()=>qm=='en2ru'?cur[3]:qm=='type_ru'?cur[2]:cur[0];
+function next(){
+ if(n>=queue.length)return end();
+ cur=queue[n++];locked=false;
+ qm=mode=='mix'?['en2ru','ru2en','type_en','type_ru'][Math.random()*4|0]:mode;
+ const typ=qm.startsWith('type'),en=qm=='en2ru'||qm=='type_ru';
+ $('#pr').textContent=n+' / '+queue.length;$('#sc').textContent='⭐ '+score;
+ $('#fb').textContent='';$('#opts').innerHTML='';
+ const nx=$('#nx');nx.classList.add('hide');nx.textContent='Дальше ▶';nx.onclick=next;
+ $('#q').textContent=en?cur[0]:cur[3];
+ $('#ipa').textContent=qm=='type_ru'?'/'+cur[1]+'/':'';
+ $('#say').classList.toggle('hide',!en);
+ $('#inp').classList.toggle('hide',!typ);$('#chk').classList.toggle('hide',!typ);
+ if(typ){const i=$('#inp');i.placeholder=qm=='type_en'?'по-английски':'как читается по-русски';i.value='';i.disabled=false;i.focus()}
+ else{const k=qm=='en2ru'?3:0,base=pool.length>3?pool:W;
+  const ds=shuf(base.filter(w=>w[k]!=cur[k])).slice(0,3);
+  shuf([cur,...ds]).forEach(w=>{const b=document.createElement('button');b.textContent=w[k];b.onclick=()=>answer(w[k]==cur[k],b);$('#opts').append(b)})}
+}
+function answer(ok,btn,msg=''){
+ if(locked)return;locked=true;const k=cur[0],c=cur;
+ if(ok){if(!retried.has(k))score++;wr[k]=Math.max(0,(wr[k]||0)-1)}
+ else{wr[k]=(wr[k]||0)+1;if(!retried.has(k)){retried.add(k);queue.push(cur)}}
+ save();$('#sc').textContent='⭐ '+score;
+ if(btn){btn.classList.add(ok?'ok':'bad');if(!ok)$$('#opts button').forEach(b=>{if(b.textContent==corr())b.classList.add('ok')})}
+ $('#fb').textContent=ok?(msg?'👍'+msg:'✅ Правильно!'):'❌ Правильно: '+corr();
+ $('#say').classList.remove('hide');say(k);
+ $('#chk').classList.add('hide');
+ if(btn&&ok)setTimeout(()=>{if(cur===c&&!$('#quiz').classList.contains('hide'))next()},900);
+ else $('#nx').classList.remove('hide');
+}
+function check(){
+ if(locked)return;const v=$('#inp').value.trim();if(!v)return;
+ $('#inp').disabled=true;let ok,msg='';
+ if(qm=='type_en')ok=nE(v)==nE(cur[0]);
+ else{const a=nR(v),c=nR(cur[2]);ok=a==c||(c.length>4&&lev(a,c)<=1);if(ok&&a!=c)msg=' Почти! Точно: '+cur[2]}
+ answer(ok,null,msg);
+}
+function end(){
+ $('#q').textContent=(score==total?'Отлично! 🏆 ':'Молодец! ⭐ ')+score+' из '+total;
+ ['#ipa','#fb','#pr','#sc'].forEach(s=>$(s).textContent='');$('#opts').innerHTML='';
+ ['#say','#inp','#chk'].forEach(s=>$(s).classList.add('hide'));
+ const b=$('#nx');b.textContent='Ещё раз 🔁';b.classList.remove('hide');b.onclick=()=>start(mode);
+}
+$$('[data-m]').forEach(b=>b.onclick=()=>start(b.dataset.m));
+$('#chk').onclick=check;
+$('#inp').onkeydown=e=>{if(e.key=='Enter')check()};
+if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js');
+</script></body></html>
